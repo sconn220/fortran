@@ -15,7 +15,7 @@ program NL_Routines
 
   !------Arnoldi testing----!
   x = (/1,2,3/)
-  iters = 3
+  iters = 2
   call arnoldi(A,x,3,iters)
 end program 
 
@@ -67,26 +67,60 @@ end program
  !--------------------------------------------------!
     
     !Declaration of Variables
-    integer :: n      !Size of matrix A
-    integer :: iters  !number of iterations in method
+    !Input Variables
+    integer,intent(IN) :: n      !Size of matrix A
+    integer,intent(IN) :: iters  !Number of iterations in method
     real(8), Dimension(n,n), intent(IN) :: A !Matrix A
     real(8), Dimension(n), intent(IN) :: x   !Initial Guess
     
-    real(8), Dimension(n) :: q
-    real(8), Dimension(n) :: r
-    real(8), Dimension(n,n) :: H
+    !Internal Variables
+    real(8), Dimension(n) :: q   !Current iteration's orthonormal vectors
+    real(8), Dimension(n) :: r   !
     
-    q = x/norm2(x)
-    !Number of iteration to solve
-    do jj = 1,iters
-        r = matmul(A,q)
-        !Stablized Gram-Schmidt Orthogonalization
-        do ii = 1,jj
-            H(ii,jj) = dot_product(q,r)
-            r = r - q*H(ii,jj)
+    !Output Variables
+    real(8), Dimension(n,n) :: H          !Hessenberg Matrix
+    real(8), Dimension(n,iters) :: Q_full !Set of all Orthonormal Vecotrs
+    
+    if (iters >= n) then 
+        print*,'Error: Number of iteration exceeds matrix size'
+    else
+        q = x/norm2(x)
+        Q_full(:,1) = q
+        !Number of iteration to solve
+        do jj = 1,iters
+            r = matmul(A,q)
+            !Stablized Gram-Schmidt Orthogonalization
+            do ii = 1,jj
+                H(ii,jj) = dot_product(q,r)
+                r = r - q*H(ii,jj)
+            end do
+            H(jj+1,jj) = norm2(r)
+            q = r/H(jj+1,jj)
+            if(jj >= iters) Q_full(:,jj+1) = q
         end do
-        H(jj+1,jj) = norm2(r)
-        q = r/H(jj+1,jj)
-    end do
+    end if
  end subroutine!}}}
  !--------------------------------------------------!
+subroutine gmres(A,X)!{{{
+ !----------------------------------------------------------
+ !Subroutine: Generalized Minimal Residual Method (GMRES)
+ !            Approximates solution to a nonsymmetrix
+ !            system of equations system of linear equations
+ !            by looking for the minimium residue in a krylov
+ !            subspace
+ !Input:
+ !
+ !Ouput:
+ !----------------------------------------------------------
+  
+  !Declear Variables
+  
+  !Initiate Variables
+
+  !Arnoldi Process
+
+  !Least Squares Using QR Process
+
+
+end subroutine!}}}
+!----------------------------------------------------!
