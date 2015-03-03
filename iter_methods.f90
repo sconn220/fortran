@@ -19,7 +19,7 @@ program NL_Routines
   call arnoldi(A,x,3,iters)
 end program 
 
-!----------------------------------------------------
+!----------------------------------------------------!
   subroutine qr(A,Q,R,m,n)!{{{
   !---------------------------------------------------
   !subroutine-Computes qr of a matrix                !
@@ -53,7 +53,7 @@ end program
       end do
   
   end subroutine !}}}
-!----------------------------------------------------
+!----------------------------------------------------!
  subroutine arnoldi(A,x,n,iters)!{{{
 
  !--------------------------------------------------!
@@ -78,7 +78,7 @@ end program
     real(8), Dimension(n) :: r   !
     
     !Output Variables
-    real(8), Dimension(n,n) :: H          !Hessenberg Matrix
+    real(8), Dimension(n+1,n) :: H          !Hessenberg Matrix
     real(8), Dimension(n,iters) :: Q_full !Set of all Orthonormal Vecotrs
     
     if (iters >= n) then 
@@ -95,20 +95,27 @@ end program
                 r = r - q*H(ii,jj)
             end do
             H(jj+1,jj) = norm2(r)
+            Q_full(:,jj) = q
             q = r/H(jj+1,jj)
-            if(jj >= iters) Q_full(:,jj+1) = q
         end do
     end if
  end subroutine!}}}
- !--------------------------------------------------!
-subroutine gmres(A,X)!{{{
+!----------------------------------------------------!
+subroutine newton_gmres(F,X)!{{{
  !----------------------------------------------------------
  !Subroutine: Generalized Minimal Residual Method (GMRES)
  !            Approximates solution to a nonsymmetrix
  !            system of equations system of linear equations
  !            by looking for the minimium residue in a krylov
- !            subspace
- !Input:
+ !            subspace. 
+ !            This method is combined with newton's method to 
+ !            Solve non-linear systems
+ !
+ !Input: F - The Non-linear Function from R^n to R^n
+ !       J - Jacobian
+ !       X - inital condition 
+ !       delta - Inital Guess
+ !       R - Residue
  !
  !Ouput:
  !----------------------------------------------------------
