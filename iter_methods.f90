@@ -2,43 +2,45 @@ program NL_Routines
 
   implicit none
 
-  !real(8), Dimension(3,3) :: J
-  !real(8), Dimension(3) :: F,u,delta
-  !integer :: iters
+  real(8), Dimension(3,3) :: J
+  real(8), Dimension(3) :: F,u,delta
+  integer :: iters
 
-  !F = 0.0     !Function Result
-  !J = 0.0     !Jacobian
-  !u = (/0.0,0.0,1.0/)     !Input Variables
-  !delta = 0.0 !inital guess for results
-  !iters = 2
+  F = 0.0     !Function Result
+  J = 0.0     !Jacobian
+  u = (/0.0,0.0,0.0/)     !Input Variables
+  delta = 0.0 !inital guess for results
+  iters = 3
 
-  !call nl_j(J,u)
-  !call nl_f(F,u)
-  !call newton_gmres(F,J,u,delta,3,iters)
+  call nl_j(J,u)
+  call nl_f(F,u)
+  call newton_gmres(F,J,u,delta,3,iters)
 
-  real(8),dimension(5,5) :: A,H,Q_full
-  real(8),dimension(5) :: x
-  integer :: ii,jj
-  H = 0
-  Q_full = 0
+!--------------Test Arnoldi---------------!
+!{{{ 
+!real(8),dimension(5,5) :: A,H,Q_full
+!  real(8),dimension(5) :: x
+!  integer :: ii,jj
+!  H = 0
+!  Q_full = 0
   
-  A(1,:) = (/0.8147,0.0975,0.1576,0.1419,0.6557/)
-  A(2,:) = (/0.9058,0.2785,0.9706,0.4218,0.0357/)
-  A(3,:) = (/0.1270,0.5469,0.9572,0.9157,0.8491/)
-  A(4,:) = (/0.9134,0.9575,0.4854,0.7922,0.9340/)
-  A(5,:) = (/0.6324,0.9649,0.8003,0.9595,0.6787/)
+!  A(1,:) = (/0.8147,0.0975,0.1576,0.1419,0.6557/)
+!  A(2,:) = (/0.9058,0.2785,0.9706,0.4218,0.0357/)
+!  A(3,:) = (/0.1270,0.5469,0.9572,0.9157,0.8491/)
+!  A(4,:) = (/0.9134,0.9575,0.4854,0.7922,0.9340/)
+!  A(5,:) = (/0.6324,0.9649,0.8003,0.9595,0.6787/)
 
-  x = (/0.7577,0.7431,0.3922,0.6555,0.1712/)
-  call arnoldi(A,x,5,3,H,Q_full)
+!  x = (/0.7577,0.7431,0.3922,0.6555,0.1712/)
+!  call arnoldi(A,x,5,3,H,Q_full)
   
   !write h to file
-  open (unit = 1, file = 'h.out', status = 'unknown')
-  do ii = 1,5
-      do jj = 1,5
-          write (1,*),ii,jj,H(ii,jj)
-      end do 
-  end do
-  
+!  open (unit = 1, file = 'h.out', status = 'unknown')
+!  do ii = 1,5
+!      do jj = 1,5
+!          write (1,*),ii,jj,H(ii,jj)
+!      end do 
+!  end do}}}
+!------------------------------------------!  
 end program 
 
 !----------------------------------------------------!
@@ -101,7 +103,7 @@ end program
     !Output Variables
     real(8), Dimension(n,n) :: H          !Hessenberg Matrix
     real(8), Dimension(n,iters) :: Q_full !Set of all Orthonormal Vecotrs
-    
+    print*,'Performing Arnoldi'
     if (iters .gt. n) then 
         print*,'Error: Number of iteration exceeds matrix size'
     else
@@ -116,7 +118,7 @@ end program
             end do
             if (jj .lt. n) then 
                 H(jj+1,jj) = norm2(r)
-                Q_full(:,jj+1) = r/H(jj+1,jj) 
+                Q_full(:,jj+1) = r/H(jj+1,jj)
             end if 
         end do
     end if
@@ -151,14 +153,16 @@ subroutine newton_gmres(F,J,x,delta,n,iters)!{{{
   real(8),dimension(n) :: r !Residue 
   real(8),dimension(n,iters) :: Q_Full
   real(8),dimension(n+1,n) :: H
+  integer :: iters
   !Initiate Variables
   r = 0
   Q_Full = 0
   H = 0 
+  
   !Arnoldi Process:
   r = -F-matmul(J,delta)  !compute residue
   call arnoldi(J,r,3,iters,H,Q_Full)
-  print*, H
+  print*,H
   !Least Squares Using QR Process
 
 
