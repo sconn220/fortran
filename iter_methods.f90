@@ -148,12 +148,13 @@ subroutine newton_gmres(F,J,x,delta,n,iters)!{{{
   real(8),dimension(n,n),intent(in) :: J   !Function and Jacobian
   real(8),dimension(n),intent(in) :: F,x   !Function, Input Variables
   real(8),dimension(n),intent(in) :: delta !Guess to solution
-  
+  integer,intent(in) :: iters, n           !Max Iterations
+
   !Internal Variables
-  real(8),dimension(n) :: r !Residue 
-  real(8),dimension(n,iters) :: Q_Full
-  real(8),dimension(n+1,n) :: H
-  integer :: iters
+  real(8),dimension(n) :: r                !Residue 
+  real(8),dimension(n,iters) :: Q_Full     !Set of Orthonormal Basis Functions
+  real(8),dimension(n+1,n) :: H            !Hessenberg Matrix 
+  integer :: jj, ii
   !Initiate Variables
   r = 0
   Q_Full = 0
@@ -161,10 +162,26 @@ subroutine newton_gmres(F,J,x,delta,n,iters)!{{{
   
   !Arnoldi Process:
   r = -F-matmul(J,delta)  !compute residue
-  call arnoldi(J,r,3,iters,H,Q_Full)
-  print*,H
-  !Least Squares Using QR Process
-
+ 
+  print*,'Performing Arnoldi'
+  if (iters .gt. n) then 
+      print*,'Error: Number of iteration exceeds matrix size'
+  else
+      Q_full(:,1) = x/norm2(x)
+      !Number of iteration to solve
+      do jj = 1,iters
+          r = matmul(A,Q_full(:,jj))
+          !Stablized Gram-Schmidt Orthogonalization
+          do ii = 1,jj
+              H(ii,jj) = dot_product(Q_full(:,ii),r)
+              r = r - H(ii,jj)*Q_Full(:,ii)
+          end do
+          if (jj .lt. n) then 
+              H(jj+1,jj) = norm2(r)
+              Q_full(:,jj+1) = r/H(jj+1,jj)
+          end if 
+      end do
+  end if
 
 end subroutine!}}}
 !----------------------------------------------------!
